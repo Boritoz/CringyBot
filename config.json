@@ -3,7 +3,6 @@
   "client_id": "client id here",
   "prefix": "prefix here",
   "owner_id": "owner id here",
-  "status": "status here",
   "youtube_api_key": "youtube api key here",
   "admins": []
   }
