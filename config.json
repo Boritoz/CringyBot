@@ -1,9 +1,9 @@
 {
-  "token": "Mjk1OTQxOTQ0ODgwNzkxNTUy.C8QA9g.3fvWt8_MW9CBI1FxpNH4kI-mUT4",
-  "client_id": "295941944880791552",
-  "prefix": ".",
-  "owner_id": "239738897985175552",
-  "status": "Made by Cringy Adam",
-  "youtube_api_key": "AIzaSyCDNhDlsxjztF7B-n5_ZZnY3uZjkKQamHg",
+  "token": "token here",
+  "client_id": "client id here",
+  "prefix": "prefix here",
+  "owner_id": "owner id here",
+  "status": "status here",
+  "youtube_api_key": "youtube api key here",
   "admins": []
   }
