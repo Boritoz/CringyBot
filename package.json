@@ -1,0 +1,28 @@
+{
+  "name": "CringyBot Normal edition",
+  "version": "1.0.0",
+  "description": "A simple discord.js bot",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/CringyAdam/CringyBot.git"
+  },
+  "keywords": [
+    "music",
+    "bot",
+    "discord",
+    "node.js",
+    "npm",
+    "ytdl"
+  ],
+  "author": "CringyAdam",
+  "dependencies": {
+    "discord.js": "github:hydrabolt/discord.js",
+    "opusscript": "0.0.1",
+    "youtube-search": "^1.0.6",
+    "ytdl-core": "^0.7.17"
+  }
+}
