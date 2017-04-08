@@ -1128,7 +1128,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                   name: bot.user.username
                 },
                 title: 'Currently playing',
-                description `Currently playing: ${queue[0].title} | by ${queue[0].requested}`,
+                description: `Currently playing: ${queue[0].title} | by ${queue[0].requested}`,
                 timestamp: new Date(),
                 color: 0x008AF3,
                 footer: {
@@ -1167,7 +1167,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                   name: bot.user.username
                 },
                 title: 'Queue:',
-                description `${text}`,
+                description: `${text}`,
                 timestamp: new Date(),
                 color: 0x008AF3,
                 footer: {
