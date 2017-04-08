@@ -1186,7 +1186,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
             message.channel.sendMessage('', {
               embed: {
                 author: {
-                  name: client.user.username
+                  name: bot.user.username
                 },
                 color: 0x008AF3,
                 title: 'Google search results:',
@@ -1194,7 +1194,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                 timestamp: new Date(),
                 footer: {
                   text: 'CringyBot Normal edition',
-                  icon_url: client.user.avatarURL
+                  icon_url: bot.user.avatarURL
                 }
               }
            });
@@ -1206,7 +1206,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
               message.channel.sendMessage('', {
                 embed: {
                   author: {
-                    name: client.user.username
+                    name: bot.user.username
                   },
                   color: 0x88AF3,
                   title: 'Syntax error',
@@ -1214,7 +1214,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                   timestamp: new Date(),
                   footer: {
                     text: 'CringyBot Normal edition',
-                    icon_url: client.user.avatarURL
+                    icon_url: bot.user.avatarURL
                   }
                 }
               });
@@ -1225,7 +1225,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
               message.channel.sendMessage('', {
                 embed: {
                   author: {
-                    name: client.user.username
+                    name: bot.user.username
                   },
                   color: 0x88AF3,
                   title: 'Invalid user',
@@ -1233,17 +1233,17 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                   timestamp: new Date(),
                   footer: {
                     text: 'CringyBot Normal edition',
-                    icon_url: client.user.avatarURL
+                    icon_url: bot.user.avatarURL
                   }
                 }
               });
               console.log(prefix + 'kick ' + kickMember);
             }
-            if (!message.guild.member(client.user).hasPermission('KICK_MEMBERS')) {
+            if (!message.guild.member(bot.user).hasPermission('KICK_MEMBERS')) {
               message.channel.sendMessage('', {
                 embed: {
                   author: {
-                    name: client.user.username
+                    name: bot.user.username
                   },
                   color: 0x88AF3,
                   title: 'No permissions',
@@ -1251,7 +1251,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                   timestamp: new Date(),
                   footer: {
                     text: 'CringyBot Normal edition',
-                    icon_url: client.user.avatarURL
+                    icon_url: bot.user.avatarURL
                   }
                 }
               });
@@ -1262,7 +1262,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
               message.channel.sendMessage('', {
                 embed: {
                   author: {
-                    name: client.user.username
+                    name: bot.user.username
                   },
                   color: 0x88AF3,
                   title: `Successfully kicked ${kickMember}`,
@@ -1270,7 +1270,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                   timestamp: new Date(),
                   footer: {
                     text: 'CringyBot Normal edition',
-                    icon_url: client.user.avatarURL
+                    icon_url: bot.user.avatarURL
                   }
                 }
               });
@@ -1281,11 +1281,11 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
           if (message.content.startsWith(prefix + 'nick')) {
             let args = message.content.split(" ").slice(1);
             let nickname = args.join(" ");
-            if (!message.guild.member(client.user).hasPermission('CHANGE_NICKNAME')) {
+            if (!message.guild.member(bot.user).hasPermission('CHANGE_NICKNAME')) {
               message.channel.sendMessage('', {
                 embed: {
                   author: {
-                    name: client.user.username
+                    name: bot.user.username
                   },
                   color: 0x008AF3,
                   title: 'No permissions',
@@ -1293,17 +1293,17 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                   timestamp: new Date(),
                   footer: {
                     text: 'CringyBot Normal edition',
-                    icon_url: client.user.avatarURL
+                    icon_url: bot.user.avatarURL
                   }
                 }
               });
               console.log(prefix + 'nick');
             } else {
-                message.guild.member(client.user).setNickname(nickname);
+                message.guild.member(bot.user).setNickname(nickname);
                 message.channel.sendMessage('', {
                   embed: {
                     author: {
-                      name: client.user.username
+                      name: bot.user.username
                     },
                     color: 0x008AF3,
                     title: 'Nickname changed successfully!',
@@ -1311,7 +1311,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                     timestamp: new Date(),
                     footer: {
                       text: 'CringyBot Normal edition',
-                      icon_url: client.user.avatarURL
+                      icon_url: bot.user.avatarURL
                     }
                   }
                 });
@@ -1320,14 +1320,13 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
             }
 
             if (message.content.startsWith(prefix + 'game')) {
-              message.delete();
               let args = message.content.split(" ").slice(1);
               let game = args.join(" ");
-              client.user.setGame(game);
+              bot.user.setGame(game);
               message.channel.sendMessage('', {
                 embed : {
                   author: {
-                    name: client.user.username
+                    name: bot.user.username
                   },
                   title: 'Game successfully changed!',
                   color: 0x008AF3,
@@ -1335,7 +1334,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                   timestamp: new Date(),
                   footer: {
                     text: 'CringyBot Selfbot edition',
-                    icon_url: client.user.avatarURL
+                    icon_url: bot.user.avatarURL
                   }
                 }
               });
