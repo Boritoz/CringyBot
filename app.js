@@ -356,6 +356,9 @@ bot.on("message", function(message) {
     **${prefix}sendmsg** <channel_ID> <message_text> - Owner only. Sends a message to a channel.\n
     **${prefix}resume** - Resumes paused song.\n
     **${prefix}about** - Info about the bot.\n
+    **${prefix}kick** - Admin only. Kicks a user.\n
+    **${prefix}nick** - Changes the bot's Nickname.\n
+    **${prefix}google* <stuff_to_search> - Searches Google.\n
     **${prefix}shutdown** - Power off the bot (Owner only).\n
     **${prefix}invite** - Creates OAuth URL for bot.\n
     **${prefix}git** - Sends link to github repo.\n
@@ -1202,6 +1205,7 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
         }
 
           if (message.content.startsWith(prefix + 'kick')) {
+            if (message.author.id !== config.owner_id) return;
             if (message.mentions.users.size == 0) {
               message.channel.sendMessage('', {
                 embed: {
