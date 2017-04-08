@@ -21,7 +21,6 @@ try {
             "client_id": "241966505334407168",
             "prefix": ".",
             "owner_id": "171319044715053057",
-            "status": "Made by Cringy Adam.",
             "youtube_api_key": process.env.YOUTUBE_API_KEY,
             "admins": []
         }
@@ -1318,6 +1317,29 @@ This is an instance of Cringy Adam's CringyBot! I am written in discord.js and u
                 });
                 console.log(prefix + 'nick');
               }
+            }
+
+            if (message.content.startsWith(prefix + 'game')) {
+              message.delete();
+              let args = message.content.split(" ").slice(1);
+              let game = args.join(" ");
+              client.user.setGame(game);
+              message.channel.sendMessage('', {
+                embed : {
+                  author: {
+                    name: client.user.username
+                  },
+                  title: 'Game successfully changed!',
+                  color: 0x008AF3,
+                  description: `Game changed to **${game}**!`,
+                  timestamp: new Date(),
+                  footer: {
+                    text: 'CringyBot Selfbot edition',
+                    icon_url: client.user.avatarURL
+                  }
+                }
+              });
+              console.log(prefix + 'game');
             }
 
     } catch (err) {
