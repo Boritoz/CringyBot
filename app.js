@@ -1,7 +1,7 @@
 /*
          © Copyright Adam Aharony (a.k.a. Cringy Adam)
                     All rights reserved
-       Twitter: @AdamAharony, Discord: @Cringy Adam#3754
+       Twitter: @AdamAharony, Discord: @Cringy Adam#4611
 */
 
 var errorlog = require("./data/errors.json");
