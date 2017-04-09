@@ -358,10 +358,10 @@ bot.on("message", function(message) {
     **${prefix}about** - Info about the bot.\n
     **${prefix}kick** - Admin only. Kicks a user.\n
     **${prefix}nick** - Changes the bot's Nickname.\n
-    **${prefix}google* <stuff_to_search> - Searches Google.\n
+    **${prefix}google** <stuff_to_search> - Searches Google.\n
     **${prefix}shutdown** - Power off the bot (Owner only).\n
     **${prefix}invite** - Creates OAuth URL for bot.\n
-    **${prefix}git** - Sends link to github repo.\n
+    **${prefix}github** - Sends link to github repo.\n
     **${prefix}play** - Plays a link that you have wanted it to.\n
     **${prefix}userblacklist** <add/remove> <user id> - Blacklists a user.\n
     **${prefix}warn** <user> <reason> - Warns a user for the thing they did wrong.\n
