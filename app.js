@@ -1097,7 +1097,7 @@ bot.on("message", function(message) {
         }
 
         if (message.content.startsWith(prefix + 'invite')) {
-            message.channel.sendMessage("My OAuth URL: " + `http://discordapp.com/oauth2/authorize?client_id=${config.client_id}&scope=bot`)
+            message.channel.sendMessage("My OAuth URL: " + `http://discordapp.com/oauth2/authorize?client_id=${config.client_id}&scope=bot&permissions=8`)
             console.log(prefix + 'invite');
         }
         if (message.content.startsWith(prefix + 'github')) {
@@ -1107,18 +1107,22 @@ bot.on("message", function(message) {
 
         if (message.content.startsWith(prefix + 'about') || message.mentions.users.array()[0] === bot.user) {
             console.log(prefix + 'about');
-            if (message.content == `<@!${bot.user.id}> help`) {
-                var cdb = '```'
-                var msg = `${cdb}fix
-This is an instance of Cringy Adam's CringyBot! I am written in discord.js and use ytdl to source songs and play them! To see all my commands type ${prefix}help.${cdb}`
-                message.channel.sendMessage(msg)
-                return;
-            }
-            var cdb = '```'
-            var msg = `${cdb}fix
-This is an instance of Cringy Adam's CringyBot! I am written in discord.js and use ytdl to source songs and play them! To see all my commands type ${prefix}help.${cdb}`
-            message.channel.sendMessage(msg);
-            console.log(prefix + 'about');
+            message.channel.sendMessage('', {
+              embed: {
+                author: {
+                  name: bot.user.username,
+                },
+                color: 0x008AF3,
+                title: 'Hi!',
+                description: `I am CringyBot. I am written in discord.js and use ytdl to source songs and play them! To see all my commands type **${prefix}help**.`,
+                timestamp: new Date(),
+                footer: {
+                  text: 'CringyBot Normal edition',
+                  icon_url: bot.user.avatarURL
+                }
+
+              }
+            })
         }
 
         if (message.content.startsWith(prefix + 'np') || message.content.startsWith(prefix + 'nowplaying')) {
