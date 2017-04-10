@@ -318,7 +318,7 @@ bot.on("message", function(message) {
             message.reply("Please insert a channel ID.");
             return;
           }
-          if (bot.channels.get(message.content.split(" ")[1]) === undefined) {
+          if (bot.channels.get(message.content.split(" ")[1]) == undefined) {
             message.reply("Not a valid channel ID.");
             return;
           }
@@ -329,7 +329,7 @@ bot.on("message", function(message) {
         }
 
         if (message.content.startsWith(prefix + 'help')) {
-            message.channel.sendMessage("Check your DM's **" + message.author.username + "**")
+            message.reply(" check your DM's :mailbox:");
             message.author.sendMessage('', {
               embed: {
                 author: {
@@ -358,8 +358,8 @@ bot.on("message", function(message) {
     **${prefix}about** - Info about the bot.\n
     **${prefix}kick** - Admin only. Kicks a user.\n
     **${prefix}nick** - Changes the bot's Nickname.\n
+    **${prefix}game** - Sets the bot's game.\n
     **${prefix}google** <stuff_to_search> - Searches Google.\n
-    **${prefix}shutdown** - Power off the bot (Owner only).\n
     **${prefix}invite** - Creates OAuth URL for bot.\n
     **${prefix}github** - Sends link to github repo.\n
     **${prefix}play** - Plays a link that you have wanted it to.\n
@@ -369,8 +369,9 @@ bot.on("message", function(message) {
     **${prefix}serverblacklist** <add/remove> <server id> - Adds or removes servers from blacklist.\n
     **${prefix}note** - Takes a note.\n
     **${prefix}mynotes** - Shows notes you have taken.\n
-    **${prefix}math** <maths> - evaluates math equations.\n
+    **${prefix}math** <maths> - Evaluates math equations.\n
     **${prefix}uptime** - Shows bot uptime.\n
+    **${prefix}shutdown** - Owner only - Shuts down the bot.\n
     **${prefix}sys** - Gets system information.`
               }
             })
@@ -876,16 +877,9 @@ bot.on("message", function(message) {
         }
 
         if (message.content.startsWith(prefix + 'shutdown')) {
-            if (message.author.id === config.owner_id || config.admins.indexOf(message.author.id) != -1) {
-                message.channel.sendMessage("**Shutdown has been initiated**.\nShutting down...")
-                setTimeout(function() {
-                    bot.destroy()
-                }, 1000)
-                setTimeout(function() {
-                    process.exit()
-                }, 2000)
-            }
+          process.exit();
         }
+
 
         if (message.content.startsWith(prefix + 'warn')) {
             if (message.channel.permissionsFor(message.author).hasPermission("KICK_MEMBERS") || message.channel.permissionsFor(message.author).hasPermission("BAN_MEMBERS")) {
@@ -1328,6 +1322,7 @@ bot.on("message", function(message) {
             }
 
             if (message.content.startsWith(prefix + 'game')) {
+              if (message.author.id !== config.owner_id) return;
               let args = message.content.split(" ").slice(1);
               let game = args.join(" ");
               bot.user.setGame(game);
@@ -1341,13 +1336,36 @@ bot.on("message", function(message) {
                   description: `Game changed to **${game}**!`,
                   timestamp: new Date(),
                   footer: {
-                    text: 'CringyBot Selfbot edition',
+                    text: 'CringyBot Normal edition',
                     icon_url: bot.user.avatarURL
                   }
                 }
               });
               console.log(prefix + 'game');
             }
+
+          if (message.content.startsWith(prefix + 'stream')) {
+            if (message.author.id !== config.owner_id) return;
+            let args = message.content.split(" ").slice(1);
+            let stream = args.join(" ");
+            bot.user.setGame(stream, 'http://twitch.tv/cringyadam', 1);
+            message.channel.sendMessage('', {
+              embed : {
+                author: {
+                  name: bot.user.username
+                },
+                title: 'Streaming status successfully changed!',
+                color: 0x008AF3,
+                description: `Stream changed to **${stream}**!`,
+                timestamp: new Date(),
+                footer: {
+                  text: 'CringyBot Normal edition',
+                  icon_url: bot.user.avatarURL
+                }
+              }
+            });
+            console.log(prefix + 'stream');
+          }
 
     } catch (err) {
         console.log("WELL LADS LOOKS LIKE SOMETHING WENT WRONG! This is the error:\n\n\n" + err.stack)
