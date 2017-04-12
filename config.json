@@ -4,5 +4,6 @@
   "prefix": "prefix here",
   "owner_id": "owner id here",
   "youtube_api_key": "youtube api key here",
-  "admins": []
+  "admins": [],
+  "logchannel": "log channel here"
   }
