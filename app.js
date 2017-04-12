@@ -311,9 +311,9 @@ bot.on("message", function(message) {
         }
 
         if (message.content.startsWith(prefix + 'sendmsg')) {
-          var args = message.content.split(/[ ]+/);
+      		if(message.author.id !== config.owner_id) return;
+					var args = message.content.split(/[ ]+/);
           let reason = args.slice(2).join(" ");
-          if(message.author.id !== config.owner_id) return;
           if (message.content.split(" ")[1] === undefined) {
             message.reply("Please insert a channel ID.");
             return;
@@ -329,7 +329,7 @@ bot.on("message", function(message) {
         }
 
         if (message.content.startsWith(prefix + 'help')) {
-            message.reply(" check your DM's :mailbox:");
+            message.reply("check your DM's :mailbox:");
             message.author.sendMessage('', {
               embed: {
                 author: {
@@ -350,31 +350,35 @@ bot.on("message", function(message) {
     **${prefix}pause** - Pause the current song.\n
     **${prefix}deletewarn** <user> - Deletes a warning from a user.\n
     **${prefix}lookupwarn** <user> - Lookup warning information on a user.\n
-    **${prefix}eval** - Owner only.\n
+    **${prefix}eval** - Owner only - evaluates JS code.\n
     **${prefix}clearqueue** - Clears the list of queues.\n
     **${prefix}say** - Admin only.\n
     **${prefix}sendmsg** <channel_ID> <message_text> - Owner only. Sends a message to a channel.\n
     **${prefix}resume** - Resumes paused song.\n
     **${prefix}about** - Info about the bot.\n
-    **${prefix}kick** - Admin only. Kicks a user.\n
+    **${prefix}kick** - Admin only - Kicks a user.\n
     **${prefix}nick** - Changes the bot's Nickname.\n
-    **${prefix}game** - Sets the bot's game.\n
+    **${prefix}game** - Owner only - Sets the bot's game.\n
+		**${prefix}stream** - Owner only - Sets the bot's streaming status.
     **${prefix}google** <stuff_to_search> - Searches Google.\n
     **${prefix}invite** - Creates OAuth URL for bot.\n
     **${prefix}github** - Sends link to github repo.\n
     **${prefix}play** - Plays a link that you have wanted it to.\n
     **${prefix}userblacklist** <add/remove> <user id> - Blacklists a user.\n
     **${prefix}warn** <user> <reason> - Warns a user for the thing they did wrong.\n
-    **${prefix}reminder** <time>|<reminder> - Reminds you of something in a certain time.\n
     **${prefix}serverblacklist** <add/remove> <server id> - Adds or removes servers from blacklist.\n
-    **${prefix}note** - Takes a note.\n
-    **${prefix}mynotes** - Shows notes you have taken.\n
     **${prefix}math** <maths> - Evaluates math equations.\n
     **${prefix}uptime** - Shows bot uptime.\n
     **${prefix}shutdown** - Owner only - Shuts down the bot.\n
-    **${prefix}sys** - Gets system information.`
+    **${prefix}sys** - Gets system information.`,
+								timestamp: new Date(),
+								footer: {
+									text: 'To enable admin functionality on your server, contact @Cringy Adam#4611',
+									icon_url: bot.user.avatarURL
+								}
               }
             })
+						message.author.sendMessage('If you need any help, Join the dev server at http://adampro.cu.cc/discord')
         }
         if (message.content.startsWith(prefix + 'servers')) {
             message.channel.sendMessage("", {
@@ -501,44 +505,7 @@ bot.on("message", function(message) {
             }
 
         }
-        if (message.content.startsWith(prefix + 'note')) {
-            if (notes[message.author.id] === undefined) {
-                notes[message.author.id] = {
-                    'notes': []
-                }
-            }
-            notes[message.author.id].notes[notes[message.author.id].notes.length] = {
-                'content': message.cleanContent.split(" ").splice(1).join(" "),
-                'time': Date()
-            }
-            fs.writeFile('./data/notes.json', JSON.stringify(notes), function(err) {
-                if (err) return;
-                message.channel.sendMessage('', {
-                  embed: {
-                    author: {
-                      name: bot.user.username
-                    },
-                    title: 'Added to notes',
-                    description: `Type **${prefix}mynotes** to see all your notes.`,
-                    color: 0x008AF3,
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'CringyBot Normal edition',
-                      icon_url: bot.user.avatarURL
-                    }
-                  }
-                })
-            })
-        }
-        if (message.content === prefix + 'mynotes') {
-            var nutes = 'Here are your notes:\n\n```'
-            for (var i = 0; i < notes[message.author.id].notes.length; i++) {
-                nutes += `${i + 1}) '${notes[message.author.id].notes[i].content}' - Added ${notes[message.author.id].notes[i].time}\n`
-            }
 
-            nutes += "```"
-            message.channel.sendMessage(nutes)
-        }
 
         if (message.content.startsWith(prefix + "userblacklist")) {
             if (message.author.id === config.owner_id || config.admins.indexOf(message.author.id) != -1) {
@@ -548,9 +515,36 @@ bot.on("message", function(message) {
                 if (args[0] === "remove") {
                     ubl.splice(ubl.indexOf(args[1]))
                     fs.writeFile("./data/blusers.json", JSON.stringify(ubl))
+										bot.channels.get(config.logchannel).sendMessage('', {
+											embed: {
+												author: {
+													name: bot.user.username
+												},
+												title: 'User removed from the blacklist',
+												description: `${args[1]} was removed from the bot's blacklist.`,
+												timestamp: new Date(),
+												footer: {
+													text: 'CringyBot Normal edition',
+													icon_url: bot.user.avatar.url
+												}
+											}
                 } else if (args[0] === "add") {
                     ubl.push(args[1])
                     fs.writeFile("./data/blusers.json", JSON.stringify(sbl))
+										bot.channels.get(config.logchannel).sendMessage('', {
+											embed: {
+												author: {
+													name: bot.user.username
+												},
+												title: 'User added to the blacklist',
+												description: `${args[1]} was added to the bot's blacklist.`,
+												timestamp: new Date(),
+												footer: {
+													text: 'CringyBot Normal edition',
+													icon_url: bot.user.avatar.url
+												}
+											}
+										})
                 } else {
                     message.channel.sendMessage(`You need to specify what to do! ${prefix}userblacklist <add/remove> <server id>`, {
                       embed: {
@@ -588,7 +582,7 @@ bot.on("message", function(message) {
 
         }
 
-        if (message.content.startsWith(prefix + "clear")) {
+        if (message.content.startsWith(prefix + "clearqueue")) {
             if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1 || message.channel.permissionsFor(message.member).hasPermission('MANAGE_SERVER')) {
                 let queue = getQueue(message.guild.id);
                 if (queue.length == 0) return message.channel.sendMessage('', {
@@ -749,24 +743,21 @@ bot.on("message", function(message) {
                 message.channel.sendMessage(`Delete the case of ${warns[found].user.name}\nReason: ${warns[found].reason}`);
                 delete warns[found];
                 fs.writeFile("./data/warns.json", JSON.stringify(warns))
-            } else {
-                message.channel.sendMessage("",{
-                  embed: {
-                    author: {
-                      name: bot.user.username
-                    },
-                    title: 'Not playing!',
-                    color: 0x008AF3,
-                    description: 'I am currently not playing.',
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'CringyBot Normal edition',
-                      icon_url: bot.user.avatarURL
-                    }
-                  }
-                })
+								bot.channels.get(config.logchannel).sendMessage('', {
+									embed: {
+										author: {
+											name: bot.user.username
+										},
+										title: 'Removed warn',
+										description: `Removed warn from ${user}. Reason: ${found}.`,
+										timestamp: new Date(),
+										footer: {
+											text: 'CringyBot Normal edition',
+											icon_url: bot.user.avatar.url
+										}
+									}
             }
-        }
+
 
         if (message.content.startsWith(prefix + 'pause')) {
             if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1) {
@@ -807,74 +798,6 @@ bot.on("message", function(message) {
             }
         }
 
-        if (message.content.startsWith(prefix + 'reminder')) {
-            try {
-                let c = message.content.substring(message.content.indexOf(' ') + 1, message.content.length)
-                let msg = c.split(" ").splice(1).join(" ").split("|")
-                msg[0] = msg[0].replace(/\s/g, '')
-                let time = parseTime(msg[0])
-                let reminder = msg[1].trim()
-                message.reply("I will DM you a reminder to " + reminder + " in " + time + "!")
-                setTimeout(function() {
-                    message.channel.sendMessage(message.author + " Reminder: " + reminder)
-                }, time.countdown)
-
-                function parseTime(str) {
-                    let num, time
-                    if (str.indexOf(" ") > -1) {
-                        num = str.substring(0, str.indexOf(" "))
-                        time = str.substring(str.indexOf(" ") + 1).toLowerCase()
-                    } else {
-                        for (let i = 0; i < str.length; i++) {
-                            if (str.substring(0, i) && !isNaN(str.substring(0, i)) && isNaN(str.substring(0, i + 1))) {
-                                num = str.substring(0, i)
-                                time = str.substring(i)
-                                break
-                            }
-                        }
-                    }
-                    if (!num || isNaN(num) || num < 1 || !time || ["d", "day", "days", "h", "hr", "hrs", "hour", "hours", "m", "min", "mins", "minute", "minutes", "s", "sec", "secs", "second", "seconds"].indexOf(time) == -1) {
-                        return
-                    }
-                    let countdown = 0
-                    switch (time) {
-                        case "d":
-                        case "day":
-                        case "days":
-                            countdown = num * 86400000
-                            break
-                        case "h":
-                        case "hr":
-                        case "hrs":
-                        case "hour":
-                        case "hours":
-                            countdown = num * 3600000
-                            break
-                        case "m":
-                        case "min":
-                        case "mins":
-                        case "minute":
-                        case "minutes":
-                            countdown = num * 60000
-                            break
-                        case "s":
-                        case "sec":
-                        case "secs":
-                        case "second":
-                        case "seconds":
-                            countdown = num * 1000
-                            break
-                    }
-                    return {
-                        num: num,
-                        time: time,
-                        countdown: countdown
-                    }
-                }
-            } catch (err) {
-                message.channel.sendMessage("Invalid arguments.")
-            }
-        }
 
         if (message.content.startsWith(prefix + 'shutdown')) {
           process.exit();
@@ -921,6 +844,19 @@ bot.on("message", function(message) {
                 }
                 message.channel.sendMessage(usr + " was warned for `" + rsn + "`, check logs for more info")
                 fs.writeFile("./data/warns.json", JSON.stringify(warns))
+								bot.channels.get(config.logchannel).sendMessage('', {
+									embed: {
+										author: {
+											name: bot.user.username
+										},
+										title: 'User warned',
+										description: `${usr} was warned. Reason: ${rsn}`,
+										timestamp: new Date(),
+										footer: {
+											text: 'CringyBot Normal edition',
+											icon_url: bot.user.avatar.url
+										}
+									}
             } else {
                 message.channel.sendMessage("", {
                   embed: {
@@ -1091,7 +1027,7 @@ bot.on("message", function(message) {
         }
 
         if (message.content.startsWith(prefix + 'invite')) {
-            message.channel.sendMessage("My OAuth URL: " + `http://discordapp.com/oauth2/authorize?client_id=${config.client_id}&scope=bot&permissions=8`)
+            message.channel.sendMessage("Use http://adampro.cu.cc/invite to add me to your server.")
             console.log(prefix + 'invite');
         }
         if (message.content.startsWith(prefix + 'github')) {
@@ -1108,7 +1044,7 @@ bot.on("message", function(message) {
                 },
                 color: 0x008AF3,
                 title: 'Hi!',
-                description: `I am CringyBot. I am written in discord.js and use ytdl to source songs and play them! To see all my commands type **${prefix}help**.`,
+                description: `I am CringyBot by Cringy Adam. I am written in discord.js and use ytdl to source songs and play them! To see all my commands type **${prefix}help**.\nIf you like, theres a dev server at https://adampro.cu.cc/discord`,
                 timestamp: new Date(),
                 footer: {
                   text: 'CringyBot Normal edition',
@@ -1203,7 +1139,7 @@ bot.on("message", function(message) {
         }
 
           if (message.content.startsWith(prefix + 'kick')) {
-            if (message.author.id !== config.owner_id) return;
+            if (message.author.id !== config.admins) return;
             if (message.mentions.users.size == 0) {
               message.channel.sendMessage('', {
                 embed: {
@@ -1259,7 +1195,6 @@ bot.on("message", function(message) {
               });
               console.log(prefix + 'kick ' + kickMember);
             }
-            message.delete();
             kickMember.kick().then(member => {
               message.channel.sendMessage('', {
                 embed: {
@@ -1276,12 +1211,26 @@ bot.on("message", function(message) {
                   }
                 }
               });
+							bot.channels.get(config.logchannel).sendMessage('', {
+								embed: {
+									author: {
+										name: bot.user.username
+									},
+									title: 'User kicked',
+									description: `Kicked ${kickMember}.`,
+									timestamp: new Date(),
+									footer: {
+										text: 'CringyBot Normal edition',
+										icon_url: bot.user.avatar.url
+									}
+								}
             });
             console.log(prefix + 'kick ' + kickMember);
           }
 
           if (message.content.startsWith(prefix + 'nick')) {
-            let args = message.content.split(" ").slice(1);
+						if (message.author.id !== confi.owner_id) return;
+						let args = message.content.split(" ").slice(1);
             let nickname = args.join(" ");
             if (!message.guild.member(bot.user).hasPermission('CHANGE_NICKNAME')) {
               message.channel.sendMessage('', {
@@ -1348,7 +1297,7 @@ bot.on("message", function(message) {
             if (message.author.id !== config.owner_id) return;
             let args = message.content.split(" ").slice(1);
             let stream = args.join(" ");
-            bot.user.setGame(stream, 'http://twitch.tv/cringyadam', 1);
+            bot.user.setGame(stream, 'http://twitch.tv/cringyadam');
             message.channel.sendMessage('', {
               embed : {
                 author: {
