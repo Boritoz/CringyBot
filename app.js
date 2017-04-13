@@ -359,8 +359,8 @@ bot.on("message", function(message) {
     **${prefix}kick** - Admin only. Kicks a user.\n
     **${prefix}nick** - Changes the bot's Nickname.\n
     **${prefix}game** - Sets the bot's game.\n
-    **${prefix}purge** <number of messages to delete> - Admin only - deletes the number of messages you asked for. 
     **${prefix}google** <stuff_to_search> - Searches Google.\n
+    **${prefix}purge** <number of messages to delete> - Admin only - deletes the number of messages you asked for. \n
     **${prefix}invite** - Creates OAuth URL for bot.\n
     **${prefix}github** - Sends link to github repo.\n
     **${prefix}play** - Plays a link that you have wanted it to.\n
