@@ -298,7 +298,7 @@ bot.on("message", function(message) {
             return
         }
         if (ubl.indexOf(message.author.id) != -1 && message.content.startsWith(prefix)) {
-            message.reply(" you are blacklisted and can\'t use the bot!")
+            message.reply("you are blacklisted and can\'t use the bot!")
             return
         }
         if (message.content.startsWith(prefix + "ping")) {
@@ -311,9 +311,9 @@ bot.on("message", function(message) {
         }
 
         if (message.content.startsWith(prefix + 'sendmsg')) {
-      		if(message.author.id !== config.owner_id) return;
-					var args = message.content.split(/[ ]+/);
+          var args = message.content.split(/[ ]+/);
           let reason = args.slice(2).join(" ");
+          if(message.author.id !== config.owner_id) return;
           if (message.content.split(" ")[1] === undefined) {
             message.reply("Please insert a channel ID.");
             return;
@@ -350,16 +350,15 @@ bot.on("message", function(message) {
     **${prefix}pause** - Pause the current song.\n
     **${prefix}deletewarn** <user> - Deletes a warning from a user.\n
     **${prefix}lookupwarn** <user> - Lookup warning information on a user.\n
-    **${prefix}eval** - Owner only - evaluates JS code.\n
+    **${prefix}eval** - Owner only.\n
     **${prefix}clearqueue** - Clears the list of queues.\n
     **${prefix}say** - Admin only.\n
     **${prefix}sendmsg** <channel_ID> <message_text> - Owner only. Sends a message to a channel.\n
     **${prefix}resume** - Resumes paused song.\n
     **${prefix}about** - Info about the bot.\n
-    **${prefix}kick** - Admin only - Kicks a user.\n
+    **${prefix}kick** - Admin only. Kicks a user.\n
     **${prefix}nick** - Changes the bot's Nickname.\n
-    **${prefix}game** - Owner only - Sets the bot's game.\n
-		**${prefix}stream** - Owner only - Sets the bot's streaming status.
+    **${prefix}game** - Sets the bot's game.\n
     **${prefix}google** <stuff_to_search> - Searches Google.\n
     **${prefix}invite** - Creates OAuth URL for bot.\n
     **${prefix}github** - Sends link to github repo.\n
@@ -378,24 +377,12 @@ bot.on("message", function(message) {
 								}
               }
             })
-						message.author.sendMessage('If you need any help, Join the dev server at http://adampro.cu.cc/discord')
+						message.author.sendMessage("If you need any help, join the dev server at http://adampro.cu.cc/discord")
         }
         if (message.content.startsWith(prefix + 'servers')) {
-            message.channel.sendMessage("", {
-              embed: {
-                author: {
-                  name: bot.user.username
-                },
-                title: 'Server count!',
-                description: `I am currently on ${bot.guilds.size} server(s).`,
-                color: 0x008AF3,
-                timestamp: new Date(),
-                footer: {
-                  text: 'CringyBot Normal edition',
-                  icon_url: bot.user.avatarURL
-                }
-              }
-            })
+						const embed = new Discord.RichEmbed()
+						bot.guilds.forEach(guild => embed.addField(guild.name, guild.id))
+						message.channel.sendEmbed(embed)
         }
         if (message.content === prefix + 'uptime') {
             message.channel.sendMessage("secondsToString(process.uptime())", {
@@ -506,7 +493,6 @@ bot.on("message", function(message) {
 
         }
 
-
         if (message.content.startsWith(prefix + "userblacklist")) {
             if (message.author.id === config.owner_id || config.admins.indexOf(message.author.id) != -1) {
                 let c = message.content.split(" ").splice(1).join(" ")
@@ -515,36 +501,9 @@ bot.on("message", function(message) {
                 if (args[0] === "remove") {
                     ubl.splice(ubl.indexOf(args[1]))
                     fs.writeFile("./data/blusers.json", JSON.stringify(ubl))
-										bot.channels.get(config.logchannel).sendMessage('', {
-											embed: {
-												author: {
-													name: bot.user.username
-												},
-												title: 'User removed from the blacklist',
-												description: `${args[1]} was removed from the bot's blacklist.`,
-												timestamp: new Date(),
-												footer: {
-													text: 'CringyBot Normal edition',
-													icon_url: bot.user.avatar.url
-												}
-											}
                 } else if (args[0] === "add") {
                     ubl.push(args[1])
                     fs.writeFile("./data/blusers.json", JSON.stringify(sbl))
-										bot.channels.get(config.logchannel).sendMessage('', {
-											embed: {
-												author: {
-													name: bot.user.username
-												},
-												title: 'User added to the blacklist',
-												description: `${args[1]} was added to the bot's blacklist.`,
-												timestamp: new Date(),
-												footer: {
-													text: 'CringyBot Normal edition',
-													icon_url: bot.user.avatar.url
-												}
-											}
-										})
                 } else {
                     message.channel.sendMessage(`You need to specify what to do! ${prefix}userblacklist <add/remove> <server id>`, {
                       embed: {
@@ -582,7 +541,7 @@ bot.on("message", function(message) {
 
         }
 
-        if (message.content.startsWith(prefix + "clearqueue")) {
+        if (message.content.startsWith(prefix + "clear")) {
             if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1 || message.channel.permissionsFor(message.member).hasPermission('MANAGE_SERVER')) {
                 let queue = getQueue(message.guild.id);
                 if (queue.length == 0) return message.channel.sendMessage('', {
@@ -743,21 +702,24 @@ bot.on("message", function(message) {
                 message.channel.sendMessage(`Delete the case of ${warns[found].user.name}\nReason: ${warns[found].reason}`);
                 delete warns[found];
                 fs.writeFile("./data/warns.json", JSON.stringify(warns))
-								bot.channels.get(config.logchannel).sendMessage('', {
-									embed: {
-										author: {
-											name: bot.user.username
-										},
-										title: 'Removed warn',
-										description: `Removed warn from ${user}. Reason: ${found}.`,
-										timestamp: new Date(),
-										footer: {
-											text: 'CringyBot Normal edition',
-											icon_url: bot.user.avatar.url
-										}
-									}
+            } else {
+                message.channel.sendMessage("",{
+                  embed: {
+                    author: {
+                      name: bot.user.username
+                    },
+                    title: 'Not playing!',
+                    color: 0x008AF3,
+                    description: 'I am currently not playing.',
+                    timestamp: new Date(),
+                    footer: {
+                      text: 'CringyBot Normal edition',
+                      icon_url: bot.user.avatarURL
+                    }
+                  }
+                })
             }
-
+        }
 
         if (message.content.startsWith(prefix + 'pause')) {
             if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1) {
@@ -844,19 +806,6 @@ bot.on("message", function(message) {
                 }
                 message.channel.sendMessage(usr + " was warned for `" + rsn + "`, check logs for more info")
                 fs.writeFile("./data/warns.json", JSON.stringify(warns))
-								bot.channels.get(config.logchannel).sendMessage('', {
-									embed: {
-										author: {
-											name: bot.user.username
-										},
-										title: 'User warned',
-										description: `${usr} was warned. Reason: ${rsn}`,
-										timestamp: new Date(),
-										footer: {
-											text: 'CringyBot Normal edition',
-											icon_url: bot.user.avatar.url
-										}
-									}
             } else {
                 message.channel.sendMessage("", {
                   embed: {
@@ -1027,7 +976,7 @@ bot.on("message", function(message) {
         }
 
         if (message.content.startsWith(prefix + 'invite')) {
-            message.channel.sendMessage("Use http://adampro.cu.cc/invite to add me to your server.")
+            message.channel.sendMessage("To request an invite of the bot, join the dev server at http://adampro.cu.cc/discord")
             console.log(prefix + 'invite');
         }
         if (message.content.startsWith(prefix + 'github')) {
@@ -1044,7 +993,7 @@ bot.on("message", function(message) {
                 },
                 color: 0x008AF3,
                 title: 'Hi!',
-                description: `I am CringyBot by Cringy Adam. I am written in discord.js and use ytdl to source songs and play them! To see all my commands type **${prefix}help**.\nIf you like, theres a dev server at https://adampro.cu.cc/discord`,
+                description: `I am CringyBot by Cringy Adam. I am written in discord.js and use ytdl to source songs and play them! To see all my commands type **${prefix}help**.\nIf you need any help, join the dev server at http://adampro.cu.cc/discord`,
                 timestamp: new Date(),
                 footer: {
                   text: 'CringyBot Normal edition',
@@ -1139,97 +1088,102 @@ bot.on("message", function(message) {
         }
 
           if (message.content.startsWith(prefix + 'kick')) {
-            if (message.author.id !== config.admins) return;
-            if (message.mentions.users.size == 0) {
-              message.channel.sendMessage('', {
-                embed: {
-                  author: {
-                    name: bot.user.username
-                  },
-                  color: 0x88AF3,
-                  title: 'Syntax error',
-                  description: 'No user mentioned. can\'t kick.',
-                  timestamp: new Date(),
-                  footer: {
-                    text: 'CringyBot Normal edition',
-                    icon_url: bot.user.avatarURL
-                  }
-                }
-              });
-              console.log(prefix + 'kick ' + kickMember);
-            }
-            let kickMember = message.guild.member(message.mentions.users.first());
-            if (!kickMember) {
-              message.channel.sendMessage('', {
-                embed: {
-                  author: {
-                    name: bot.user.username
-                  },
-                  color: 0x88AF3,
-                  title: 'Invalid user',
-                  description: 'That user is invalid.',
-                  timestamp: new Date(),
-                  footer: {
-                    text: 'CringyBot Normal edition',
-                    icon_url: bot.user.avatarURL
-                  }
-                }
-              });
-              console.log(prefix + 'kick ' + kickMember);
-            }
-            if (!message.guild.member(bot.user).hasPermission('KICK_MEMBERS')) {
-              message.channel.sendMessage('', {
-                embed: {
-                  author: {
-                    name: bot.user.username
-                  },
-                  color: 0x88AF3,
-                  title: 'No permissions',
-                  description: `I don\'t have the required permissions to kick ${kickMember}.`,
-                  timestamp: new Date(),
-                  footer: {
-                    text: 'CringyBot Normal edition',
-                    icon_url: bot.user.avatarURL
-                  }
-                }
-              });
-              console.log(prefix + 'kick ' + kickMember);
-            }
-            kickMember.kick().then(member => {
-              message.channel.sendMessage('', {
-                embed: {
-                  author: {
-                    name: bot.user.username
-                  },
-                  color: 0x88AF3,
-                  title: `Successfully kicked ${kickMember}`,
-                  description: 'Ohh, that felt good.',
-                  timestamp: new Date(),
-                  footer: {
-                    text: 'CringyBot Normal edition',
-                    icon_url: bot.user.avatarURL
-                  }
-                }
-              });
-							bot.channels.get(config.logchannel).sendMessage('', {
+            if (message.author.id !== config.admins) {
+							message.channel.sendMessage('', {
 								embed: {
 									author: {
 										name: bot.user.username
 									},
-									title: 'User kicked',
-									description: `Kicked ${kickMember}.`,
+									title: 'Admin only!',
+									description: 'Sorry, only the admins can change the volume.',
+									color: 0x008AF3,
 									timestamp: new Date(),
 									footer: {
 										text: 'CringyBot Normal edition',
-										icon_url: bot.user.avatar.url
+										icon_url: bot.user.avatarURL
 									}
 								}
-            });
-            console.log(prefix + 'kick ' + kickMember);
+							});
+						}
+            else {
+							if (message.mentions.users.size == 0) {
+	              message.channel.sendMessage('', {
+	                embed: {
+	                  author: {
+	                    name: bot.user.username
+	                  },
+	                  color: 0x88AF3,
+	                  title: 'Syntax error',
+	                  description: 'No user mentioned. can\'t kick.',
+	                  timestamp: new Date(),
+	                  footer: {
+	                    text: 'CringyBot Normal edition',
+	                    icon_url: bot.user.avatarURL
+	                  }
+	                }
+	              });
+	              console.log(prefix + 'kick ' + kickMember);
+	            }
+	            let kickMember = message.guild.member(message.mentions.users.first());
+	            if (!kickMember) {
+	              message.channel.sendMessage('', {
+	                embed: {
+	                  author: {
+	                    name: bot.user.username
+	                  },
+	                  color: 0x88AF3,
+	                  title: 'Invalid user',
+	                  description: 'That user is invalid.',
+	                  timestamp: new Date(),
+	                  footer: {
+	                    text: 'CringyBot Normal edition',
+	                    icon_url: bot.user.avatarURL
+	                  }
+	                }
+	              });
+	              console.log(prefix + 'kick ' + kickMember);
+	            }
+	            if (!message.guild.member(bot.user).hasPermission('KICK_MEMBERS')) {
+	              message.channel.sendMessage('', {
+	                embed: {
+	                  author: {
+	                    name: bot.user.username
+	                  },
+	                  color: 0x88AF3,
+	                  title: 'No permissions',
+	                  description: `I don\'t have the required permissions to kick ${kickMember}.`,
+	                  timestamp: new Date(),
+	                  footer: {
+	                    text: 'CringyBot Normal edition',
+	                    icon_url: bot.user.avatarURL
+	                  }
+	                }
+	              });
+	              console.log(prefix + 'kick ' + kickMember);
+	            }
+	            kickMember.kick().then(member => {
+	              message.channel.sendMessage('', {
+	                embed: {
+	                  author: {
+	                    name: bot.user.username
+	                  },
+	                  color: 0x88AF3,
+	                  title: `Successfully kicked ${kickMember}`,
+	                  description: 'Ohh, that felt good.',
+	                  timestamp: new Date(),
+	                  footer: {
+	                    text: 'CringyBot Normal edition',
+	                    icon_url: bot.user.avatarURL
+	                  }
+	                }
+	              });
+	            });
+	            console.log(prefix + 'kick ' + kickMember);
+						}
           }
 
           if (message.content.startsWith(prefix + 'nick')) {
-						if (message.author.id !== confi.owner_id) return;
+						if (message.author.id !== config.owner_id) return;
 						let args = message.content.split(" ").slice(1);
             let nickname = args.join(" ");
             if (!message.guild.member(bot.user).hasPermission('CHANGE_NICKNAME')) {
@@ -1315,6 +1269,44 @@ bot.on("message", function(message) {
             });
             console.log(prefix + 'stream');
           }
+
+        if (message.content.startsWith(prefix + 'purge')) {
+         if (message.author.id == config.admins) return message.channel.sendMessage('', {
+								embed: {
+									author: {
+										name: bot.user.username
+									},
+									title: 'Admin only!',
+									description: 'Sorry, only the admins can change the volume.',
+									color: 0x008AF3,
+									timestamp: new Date(),
+									footer: {
+										text: 'CringyBot Normal edition',
+										icon_url: bot.user.avatarURL
+									}
+								}
+							});
+         let args = message.content.split(" ").slice(1);
+             let messagecount = parseInt(args.join(" "));
+              message.channel.fetchMessages({
+                limit: messagecount
+              }).then(messages => message.channel.bulkDelete(messages));
+              message.channel.sendMessage('', {
+                embed: {
+                  author: {
+                    name: bot.user.username
+                  },
+                  color: 0x008AF3,
+                  title: 'Messages deleted successfully!',
+                  description: `Deleted ${messagecount} messages successfully`,
+                  timestamp: new Date,
+                  footer: {
+                    text: 'CringyBot Normal edition',
+                    icon_url: bot.user.avatarURL
+                  }
+                }
+            }) 
+        }
 
     } catch (err) {
         console.log("WELL LADS LOOKS LIKE SOMETHING WENT WRONG! This is the error:\n\n\n" + err.stack)
