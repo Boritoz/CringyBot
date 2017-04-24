@@ -1,9 +1,7 @@
 {
   "token": "token here",
-  "client_id": "client id here",
   "prefix": "prefix here",
   "owner_id": "owner id here",
   "youtube_api_key": "youtube api key here",
-  "admins": [],
   "logchannel": "log channel here"
   }
