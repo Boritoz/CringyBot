@@ -28,7 +28,8 @@ try {
         process.exit(0)
     }
 }
-const admins = config.admins;
+
+
 const client = new Discord.Client();
 const notes = require('./data/notes.json');
 const os = require('os');
@@ -194,18 +195,6 @@ function secondsToString(seconds) {
     }
 }
 
-function isCommander(id) {
-	if(id === config.owner_id) {
-		return true;
-	}
-	for(var i = 0; i < admins.length; i++){
-		if(admins[i] == id) {
-			return true;
-		}
-	}
-	return false;
-}
-
 
 
 client.on('guildDelete', guild => {
@@ -318,28 +307,22 @@ client.on('voiceStateUpdate', function(oldMember, newMember) {
 });
 
 client.on("message", function(message) {
+    function isCommander(member) {
+      let adminRole = message.guild.roles.find("name", "CringyBot Admin");
+	    if (message.author.id == config.owner_id) {
+		    return true;
+	    } else if (member.roles.has(adminRole.id)) {
+        return true;
+      }
+      else {
+        return false;s
+      }
+    }
+    
+    
+    
     try {
-        if (message.author.client) return;
-            if (message.channel.type === "dm" || message.guild === undefined) {
-                message.channel.sendMessage("",{
-                  embed: {
-                    author: {
-                      name: client.user.username
-                    },
-                    title: 'Sorry lad, not now..',
-                    description: 'The client only works in servers!',
-                    color: 0x008AF3,
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'CringyBot Normal edition',
-                      icon_url: client.user.avatarURL
-                    }
-                  }
-                })
-
-                return;
-            }
-
+        if (!message.author.client) return;
 
         if (sbl.indexOf(message.guild.id) != -1 && message.content.startsWith(prefix)) {
             message.channel.sendMessage("", {
@@ -378,6 +361,21 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'sendmsg')) {
+          if (!isCommander(message.member)) return message.channel.sendMessage('', {
+                  embed: {
+                    author: {
+                      name: client.user.username
+                    },
+                    title: 'Admin only!',
+                    description: 'Sorry, this command is for the admins only.',
+                    color: 0x008AF3,
+                    timestamp: new Date(),
+                    footer: {
+                      text: 'CringyBot Normal edition',
+                      icon_url: client.user.avatarURL
+                    }
+                  }
+                });
           var args = message.content.split(/[ ]+/);
           let reason = args.slice(2).join(" ");
           if(message.author.id !== config.owner_id) return;
@@ -435,12 +433,11 @@ client.on("message", function(message) {
     **${prefix}userblacklist** <add/remove> <user id> - Blacklists a user.\n
     **${prefix}warn** <user> <reason> - Warns a user for the thing they did wrong.\n
     **${prefix}serverblacklist** <add/remove> <server id> - Adds or removes servers from blacklist.\n
-    **${prefix}math** <maths> - Evaluates math equations.\n
     **${prefix}uptime** - Shows bot uptime.\n
     **${prefix}shutdown** - Owner only - Shuts down the bot.`,
 								timestamp: new Date(),
 								footer: {
-									text: 'To enable admin functionality on your server, contact @Cringy Adam#4611',
+									text: 'To enable admin functionality on your server, give the "CringyBot Admin" role to the bot admins.',
 									icon_url: client.user.avatarURL
 								}
               }
@@ -522,7 +519,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + "serverblacklist")) {
-            if (message.author.id === config.owner_id || config.admins.indexOf(message.author.id) != -1) {
+            if (isCommander(message.member)) {
                 let c = message.content.split(" ").splice(1).join(" ")
                 let args = c.split(" ")
                 console.log("[DEVELOPER DEBUG] Blacklist args were: " + args)
@@ -538,8 +535,8 @@ client.on("message", function(message) {
                         author: {
                           name: client.user.username
                         },
-                        title: 'No args',
-                        description: `You need to specify what to do! ${prefix}serverblacklist <add/remove> <server id>`,
+                        title: 'Admin only!',
+                        description: 'Sorry, this command is for the admins only.',
                         color: 0x008AF3,
                         timestamp: new Date(),
                         footer: {
@@ -547,8 +544,8 @@ client.on("message", function(message) {
                           icon_url: client.user.avatarURL
                         }
                       }
-                    })
-                }
+                    });
+               }
             } else {
                 message.channel.sendMessage("", {
                   embed: {
@@ -571,7 +568,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + "userblacklist")) {
-            if (message.author.id === config.owner_id || config.admins.indexOf(message.author.id) != -1) {
+            if (isCommander(message.member)) {
                 let c = message.content.split(" ").splice(1).join(" ")
                 let args = c.split(" ")
                 console.log("[DEVELOPER DEBUG] Blacklist args were: " + args)
@@ -604,8 +601,8 @@ client.on("message", function(message) {
                     author: {
                       name: client.user.username
                     },
-                    title: 'Owner only!',
-                    description: 'Sorry, this command is for the owner only.',
+                    title: 'Admin only!',
+                    description: 'Sorry, this command is for the admins only.',
                     color: 0x008AF3,
                     timestamp: new Date(),
                     footer: {
@@ -620,7 +617,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + "clear")) {
-            if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1 || message.channel.permissionsFor(message.member).hasPermission('MANAGE_SERVER')) {
+            if (isCommander(message.member)) {
                 let queue = getQueue(message.guild.id);
                 if (queue.length == 0) return message.channel.sendMessage('', {
                   embed: {
@@ -676,7 +673,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + "lookupwarn")) {
-            if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1 || message.channel.permissionsFor(message.member).hasPermission('MANAGE_SERVER')) {
+            if (isCommander(message.member)) {
                 let user = message.mentions.users.array()[0];
                 if (!user) return message.channel.sendMessage("You need to mention the user");
                 let list = Object.keys(warns);
@@ -713,7 +710,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'skip')) {
-            if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1 || message.channel.permissionsFor(message.member).hasPermission('MANAGE_SERVER')) {
+            if (isCommander(message.member)) {
                 let player = message.guild.voiceConnection.player.dispatcher
                 if (!player || player.paused) return message.channel.sendMessage("", {
                   embed: {
@@ -767,7 +764,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + "deletewarn")) {
-            if (message.channel.permissionsFor(message.member).hasPermission("KICK_MEMBERS") || message.channel.permissionsFor(message.member).hasPermission("BAN_MEMBERS") || message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1) {
+            if (isCommander(message.member)) {
                 let user = message.mentions.users.array()[0];
                 if (!user) return message.channel.sendMessage("You need to mention the user");
                 let list = Object.keys(warns);
@@ -804,7 +801,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'pause')) {
-            if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1) {
+            if (isCommander(message.member)) {
                 let player = message.guild.voiceConnection.player.dispatcher
                 if (!player || player.paused) return message.channel.sendMessage('', {
                   embed: {
@@ -848,7 +845,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'warn')) {
-            if (message.channel.permissionsFor(message.author).hasPermission("KICK_MEMBERS") || message.channel.permissionsFor(message.author).hasPermission("BAN_MEMBERS")) {
+            if (isCommander(message.member)) {
                 let c = message.content
                 let usr = message.mentions.users.array()[0]
                 if (!usr) return message.channel.sendMessage("You need to mention the user");
@@ -887,12 +884,28 @@ client.on("message", function(message) {
                 }
                 message.channel.sendMessage(usr + " was warned for `" + rsn + "`, check logs for more info")
                 fs.writeFile("./data/warns.json", JSON.stringify(warns))
+            } else {
+              message.channel.sendMessage('', {
+                      embed: {
+                        author: {
+                          name: client.user.username
+                        },
+                        title: 'Admin only!',
+                        description: 'Sorry, this command is for the admins only.',
+                        color: 0x008AF3,
+                        timestamp: new Date(),
+                        footer: {
+                          text: 'CringyBot Normal edition',
+                          icon_url: client.user.avatarURL
+                        }
+                      }
+                    });
             }
         }
 
 
         if (message.content.startsWith(prefix + 'say')) {
-            if (message.author.id === config.owner_id || config.admins.indexOf(message.author.id) != -1) {
+            if (isCommander(message.member)) {
                 var say = message.content.split(" ").splice(1).join(" ")
                 message.delete();
                 message.channel.sendMessage(say)
@@ -901,9 +914,27 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'eval')) {
-            if (isCommander(message.author.id)) {
+            if (isCommander(message.member)) {
                 try {
                     let code = message.content.split(" ").splice(1).join(" ")
+                    if (code == "config.token" || code == "client.token" || code == "token") {
+                      message.channel.sendMessage('', {
+                        embed: {
+                          author: {
+                            name: client.user.username
+                          },
+                          color: 0x88AF3,
+                          title: 'Security warning!',
+                          description: 'Successfully blocked token leak!',
+                          timestamp: new Date(),
+                          footer: {
+                            text: 'CringyBot Normal edition',
+                            icon_url: client.user.avatarURL
+                          }
+                        }
+                      });
+                      return;
+                    }
                     let result = eval(code)
                     message.channel.sendMessage("```diff\n+ " + result + "```")
                 } catch (err) {
@@ -962,7 +993,7 @@ client.on("message", function(message) {
                     }
                   }
                 });
-            } else if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1) {
+            } else if (isCommander(message.member)) {
                 let volumeBefore = player.volume
                 let volume = parseInt(suffix);
                 if (volume > 100) return message.channel.sendMessage("The volume can't be higher then 100");
@@ -1003,7 +1034,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'resume')) {
-            if (message.guild.owner.id == message.author.id || message.author.id == config.owner_id || config.admins.indexOf(message.author.id) != -1) {
+            if (isCommander(message.member)) {
                 let player = message.guild.voiceConnection.player.dispatcher
                 if (!player) return message.channel.sendMessage('', {
                   embed: {
@@ -1073,9 +1104,9 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'invite')) {
-            message.channel.sendMessage("To request an invite of the bot, join the dev server at http://adampro.cu.cc/discord")
-            console.log(prefix + 'invite');
-        }
+            if (isCommander(message.member)) return message.channel.sendMessage(`To invite this bot to your server, use https://discordapp.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
+            else return message.channel.sendMessage('To request an invite of the bot to your server, go to http://adampro.cu.cc/discord');
+      }
 
 
         if (message.content.startsWith(prefix + 'github')) {
@@ -1192,7 +1223,21 @@ client.on("message", function(message) {
 
 
           if (message.content.startsWith(prefix + 'kick')) {
-            if (message.author.id !== config.admins) {
+            if (!isCommander(message.member)) return message.channel.sendMessage('', {
+                      embed: {
+                        author: {
+                          name: client.user.username
+                        },
+                        title: 'Admin only!',
+                        description: 'Sorry, this command is for the admins only.',
+                        color: 0x008AF3,
+                        timestamp: new Date(),
+                        footer: {
+                          text: 'CringyBot Normal edition',
+                          icon_url: client.user.avatarURL
+                        }
+                      }
+                    });
 							message.channel.sendMessage('', {
 								embed: {
 									author: {
@@ -1208,8 +1253,7 @@ client.on("message", function(message) {
 									}
 								}
 							});
-						}
-            else {
+						
 							if (message.mentions.users.size == 0) {
 	              message.channel.sendMessage('', {
 	                embed: {
@@ -1283,7 +1327,6 @@ client.on("message", function(message) {
 	              });
 	            });
 	            console.log(prefix + 'kick ' + kickMember);
-						}
           }
 
 
@@ -1331,7 +1374,21 @@ client.on("message", function(message) {
 
 
             if (message.content.startsWith(prefix + 'game')) {
-              if (message.author.id !== config.owner_id) return;
+              if (isCommander(message.member)) return message.channel.sendMessage('', {
+                      embed: {
+                        author: {
+                          name: client.user.username
+                        },
+                        title: 'Admin only!',
+                        description: 'Sorry, this command is for the admins only.',
+                        color: 0x008AF3,
+                        timestamp: new Date(),
+                        footer: {
+                          text: 'CringyBot Normal edition',
+                          icon_url: client.user.avatarURL
+                        }
+                      }
+                    });
               let args = message.content.split(" ").slice(1);
               let game = args.join(" ");
               client.user.setGame(game);
@@ -1355,7 +1412,21 @@ client.on("message", function(message) {
 
 
           if (message.content.startsWith(prefix + 'stream')) {
-            if (message.author.id !== config.owner_id) return;
+            if (isCommander(message.member)) return message.channel.sendMessage('', {
+                      embed: {
+                        author: {
+                          name: client.user.username
+                        },
+                        title: 'Admin only!',
+                        description: 'Sorry, this command is for the admins only.',
+                        color: 0x008AF3,
+                        timestamp: new Date(),
+                        footer: {
+                          text: 'CringyBot Normal edition',
+                          icon_url: client.user.avatarURL
+                        }
+                      }
+                    });
             let args = message.content.split(" ").slice(1);
             let stream = args.join(" ");
             client.user.setGame(stream, 'http://twitch.tv/cringyadam');
@@ -1379,7 +1450,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'purge')) {
-         if (message.author.id == config.admins) return message.channel.sendMessage('', {
+         if (isCommander(message.member)) return message.channel.sendMessage('', {
 								embed: {
 									author: {
 										name: client.user.username
