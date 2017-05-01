@@ -1,5 +1,5 @@
 {
-  "name": "CringyBot Normal edition",
+  "name": "cringybot",
   "version": "1.0.0",
   "description": "A simple discord.js bot",
   "main": "app.js",
@@ -18,11 +18,12 @@
     "npm",
     "ytdl"
   ],
-  "author": "CringyAdam",
+  "author": "Cringy Adam",
   "dependencies": {
-    "discord.js": "github:hydrabolt/discord.js",
-    "opusscript": "0.0.1",
-    "youtube-search": "^1.0.6",
-    "ytdl-core": "^0.7.17"
+    "discord.js": "^11.0.0",
+    "google": "^2.1.0",
+    "opusscript": "0.0.3",
+    "youtube-search": "^1.0.9",
+    "ytdl-core": "^0.12.1"
   }
 }
