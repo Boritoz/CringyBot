@@ -40,6 +40,7 @@ const ubl = require("./data/blusers.json");
 const fs = require("fs");
 const warns = require("./data/warns.json");
 const queues = {};
+const google = require('google');
 const ytdl = require('ytdl-core');
 const search = require('youtube-search');
 const opts = {
@@ -67,7 +68,6 @@ var paused = {};
 function play(message, queue, song) {
     try {
         if (!message || !queue) return;
-        //if (message.guild.voiceConnection.channel.members.first() == undefined)
         if (song) {
             search(song, opts, function(err, results) {
                if (err) {
@@ -140,13 +140,12 @@ function play(message, queue, song) {
             intent = connection.playStream(queue[0].toplay);
 
             intent.on('error', () => {
-                queue.shift()
+                queue.shift();
                 play(message, queue)
             })
 
             intent.on('end', () => {
-                queue.shift()
-                play(message, queue)
+                queue.shift();
             })
         }
 
@@ -291,7 +290,6 @@ client.on('voiceStateUpdate', function(oldMember, newMember) {
 					var game = client.user.presence.game.name;
                     delete paused[svr[i].voiceConnection.channel.id]
                     game = game.split("⏸")[1];
-					client.user.setGame(game);
                 }
             }
             if (svr[i].voiceConnection.channel.members.size === 1 && !svr[i].voiceConnection.player.dispatcher.paused) {
@@ -300,7 +298,6 @@ client.on('voiceStateUpdate', function(oldMember, newMember) {
                 paused[svr[i].voiceConnection.channel.id] = {
                     "player": svr[i].voiceConnection.player.dispatcher
                 }
-                client.user.setGame("⏸ " + game);
             }
         }
     }
@@ -345,7 +342,7 @@ client.on("message", function(message) {
 
 
         if (ubl.indexOf(message.author.id) != -1 && message.content.startsWith(prefix)) {
-            message.reply("you are blacklisted and can\'t use the client!")
+            message.reply("you are blacklisted and can\'t use the bot!")
             return
         }
 
@@ -404,36 +401,36 @@ client.on("message", function(message) {
                 title: 'Bot help:',
                 color: 0x008AF3,
                 description : `
-    **${prefix}help** - Shows this message.\n
-    **${prefix}ping** - Ping/Pong with ms amount.\n
-    **${prefix}servers** Shows amount of servers.\n
-    **${prefix}play** - Plays the song you requested.\n
-    **${prefix}voteskip** - You may vote to skip a song.\n
-    **${prefix}volume** <volume> - Change the volume.\n
-    **${prefix}queue** - Check the list of songs that are queued.\n
-    **${prefix}np/nowplaying** - Check the current song out.\n
-    **${prefix}skip** - Skips the playing song.\n
-    **${prefix}pause** - Pause the current song.\n
-    **${prefix}deletewarn** <user> - Deletes a warning from a user.\n
-    **${prefix}lookupwarn** <user> - Lookup warning information on a user.\n
-    **${prefix}eval** - Owner only.\n
-    **${prefix}clearqueue** - Clears the list of queues.\n
-    **${prefix}say** - Admin only.\n
-    **${prefix}sendmsg** <channel_ID> <message_text> - Owner only. Sends a message to a channel.\n
-    **${prefix}resume** - Resumes paused song.\n
-    **${prefix}about** - Info about the bot.\n
-    **${prefix}kick** - Admin only. Kicks a user.\n
-    **${prefix}nick** - Changes the bot's Nickname.\n
-    **${prefix}game** - Sets the bot's game.\n
-    **${prefix}google** <stuff_to_search> - Searches Google.\n
-    **${prefix}purge** <number of messages to delete> - Admin only - deletes the number of messages you asked for. \n
-    **${prefix}invite** - Creates OAuth URL for bot.\n
-    **${prefix}github** - Sends link to github repo.\n
-    **${prefix}play** - Plays a link that you have wanted it to.\n
-    **${prefix}userblacklist** <add/remove> <user id> - Blacklists a user.\n
-    **${prefix}warn** <user> <reason> - Warns a user for the thing they did wrong.\n
-    **${prefix}serverblacklist** <add/remove> <server id> - Adds or removes servers from blacklist.\n
-    **${prefix}uptime** - Shows bot uptime.\n
+    **${prefix}help** - Shows this message.
+    **${prefix}ping** - Ping/Pong with ms amount.
+    **${prefix}servers** Shows amount of servers.
+    **${prefix}play** - Plays the song you requested.
+    **${prefix}voteskip** - You may vote to skip a song.
+    **${prefix}volume** <volume> - Change the volume.
+    **${prefix}queue** - Check the list of songs that are queued.
+    **${prefix}np/nowplaying** - Check the current song out.
+    **${prefix}skip** - Skips the playing song.
+    **${prefix}pause** - Pause the current song.
+    **${prefix}deletewarn** <user> - Deletes a warning from a user.
+    **${prefix}lookupwarn** <user> - Lookup warning information on a user.
+    **${prefix}eval** - Owner only.
+    **${prefix}clearqueue** - Clears the list of queues.
+    **${prefix}say** - Admin only.
+    **${prefix}sendmsg** <channel_ID> <message_text> - Owner only. Sends a message to a channel.
+    **${prefix}resume** - Resumes paused song.
+    **${prefix}about** - Info about the bot.
+    **${prefix}kick** - Admin only. Kicks a user.
+    **${prefix}nick** - Changes the bot's Nickname.
+    **${prefix}game** - Sets the bot's game.
+    **${prefix}google** <stuff_to_search> - Searches Google.
+    **${prefix}purge** <number of messages to delete> - Admin only - deletes the number of messages you asked for.
+    **${prefix}invite** - Creates OAuth URL for bot.
+    **${prefix}github** - Sends link to github repo.
+    **${prefix}play** - Plays a link that you have wanted it to.
+    **${prefix}userblacklist** <add/remove> <user id> - Blacklists a user.
+    **${prefix}warn** <user> <reason> - Warns a user for the thing they did wrong.
+    **${prefix}serverblacklist** <add/remove> <server id> - Adds or removes servers from blacklist.
+    **${prefix}uptime** - Shows bot uptime.
     **${prefix}shutdown** - Owner only - Shuts down the bot.`,
 								timestamp: new Date(),
 								footer: {
@@ -612,7 +609,6 @@ client.on("message", function(message) {
                   }
                 })
             }
-
         }
 
 
@@ -727,7 +723,7 @@ client.on("message", function(message) {
                     }
                   }
                 })
-                message.channel.sendMessage('Skipping song...', {
+                message.channel.sendMessage('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -840,6 +836,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'shutdown')) {
+          if (!isCommander(message.member)) return;
           process.exit();
         }
 
@@ -906,9 +903,9 @@ client.on("message", function(message) {
 
         if (message.content.startsWith(prefix + 'say')) {
             if (isCommander(message.member)) {
-                var say = message.content.split(" ").splice(1).join(" ")
+                var say = message.content.split(" ").splice(1).join(" ");
                 message.delete();
-                message.channel.sendMessage(say)
+                message.channel.sendMessage(say);
             }
         }
 
@@ -996,7 +993,7 @@ client.on("message", function(message) {
             } else if (isCommander(message.member)) {
                 let volumeBefore = player.volume
                 let volume = parseInt(suffix);
-                if (volume > 100) return message.channel.sendMessage("The volume can't be higher then 100");
+                if (volume > 100) return message.channel.sendMessage("The volume cannot be higher then 100");
                 player.setVolume((volume / 100));
                 message.channel.sendMessage('', {
                   embed: {
@@ -1139,7 +1136,21 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + 'np') || message.content.startsWith(prefix + 'nowplaying')) {
             console.log(prefix + 'np/nowplaying');
             let queue = getQueue(message.guild.id);
-            if (queue.length == 0) return message.channel.sendMessage(message, "No music in queue");
+            if (queue.length == 0) return message.channel.sendMessage('', {
+              embed: {
+                author: {
+                  name: client.user.username
+                },
+                title: 'No music!',
+                color: 0x008AF3,
+                description: 'No music in queue.',
+                timestamp: new Date(),
+                footer: {
+                  text: 'CringyBot Normal edition',
+                  icon_url: client.user.avatarURL
+                }
+              }
+            });
             message.channel.sendMessage('', {
               embed: {
                 author: {
@@ -1199,26 +1210,35 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'google')) {
-            let args = message.content.split(" ").slice(1);
-            let search = args.join(' ');
-            let input = args.join("+");
-            let link = "https://www.google.com/search?site=&source=hp&q=" + input;
-            message.channel.sendMessage('', {
-              embed: {
-                author: {
-                  name: client.user.username
-                },
-                color: 0x008AF3,
-                title: 'Google search results:',
-                description: `Results for **${search}**: Click [here](${link})!`,
-                timestamp: new Date(),
-                footer: {
-                  text: 'CringyBot Normal edition',
-                  icon_url: client.user.avatarURL
+          let args = message.content.split(" ").slice(1);
+          let input = args.join(" ");
+          google.resultsPerPage = 1
+          var nextCounter = 0
+ 
+          google(input, function (err, res){
+             if (err) console.error(err);
+              for (var i = 0; i < res.links.length; ++i) {
+              var link = res.links[i];
+              message.channel.sendMessage('', {
+                embed: {
+                  author: {
+                    name: client.user.username,
+                    icon_url: "http://i.imgur.com/EdV2r11.png"
+                  },
+                  title: `${link.title}`,
+                  url: `${link.href}`,
+                  color: 0x008AF3,
+                  description: `${link.description}\n**Click [here](${link.href}) to go to the link.**`,
+                  timestamp: new Date(),
+                  footer: {
+                    text: 'CringyBot Normal edition',
+                    icon_url: client.user.avatarURL
+                  }
                 }
-              }
-           });
-           console.log(prefix + `google ${search}`);
+              })
+            }
+          })
+          console.log(prefix + `google ${search}`);
         }
 
 
