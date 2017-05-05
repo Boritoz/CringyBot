@@ -118,7 +118,7 @@ function play(message, queue, song) {
                     }, 1000)
                 }
             })
-        } else if (queue.length != 0) {
+        } else if (queue.length !== 0) {
             message.channel.sendMessage('', {
               embed: {
                     author: {
@@ -141,7 +141,7 @@ function play(message, queue, song) {
 
             intent.on('error', () => {
                 queue.shift();
-                play(message, queue)
+                play(message, queue);
             })
 
             intent.on('end', () => {
