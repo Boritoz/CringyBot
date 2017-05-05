@@ -146,6 +146,7 @@ function play(message, queue, song) {
 
             intent.on('end', () => {
                 queue.shift();
+		play(message, queue);
             })
         }
 
