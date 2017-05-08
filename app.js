@@ -62,6 +62,20 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * (max + 1));
 }
 
+function getRandomMusic(queue, msg) {
+    fs.readFile('./data/autoplaylist.txt', 'utf8', function(err, data) {
+        if (err) throw err;
+        console.log('OK: autoplaylist.txt');
+        var random = data.split('\n');
+        var num = getRandomInt(random.length);
+        console.log(random[num])
+        var url = random[num];
+        msg.author.username = "AUTOPLAYLIST";
+        play(msg, queue, url)
+    });
+}
+
+
 var paused = {};
 
 
@@ -71,7 +85,7 @@ function play(message, queue, song) {
         if (song) {
             search(song, opts, function(err, results) {
                if (err) {
-                 message.channel.sendMessage('', {
+                 message.channel.send('', {
                    embed: {
                      author: {
                        name: client.user.username
@@ -97,7 +111,7 @@ function play(message, queue, song) {
                     "toplay": stream
                 });
                 console.log("Queued " + queue[queue.length - 1].title + " in " + message.guild.name + " as requested by " + queue[queue.length - 1].requested);
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -118,8 +132,8 @@ function play(message, queue, song) {
                     }, 1000)
                 }
             })
-        } else if (queue.length !== 0) {
-            message.channel.sendMessage('', {
+        } else if (queue.length != 0) {
+            message.channel.send('', {
               embed: {
                     author: {
                       name: client.user.username
@@ -141,13 +155,13 @@ function play(message, queue, song) {
 
             intent.on('error', () => {
                 queue.shift();
-                play(message, queue);
             })
 
             intent.on('end', () => {
                 queue.shift();
-		play(message, queue);
             })
+        } else {
+            getRandomMusic(queue, message);
         }
 
     } catch (err) {
@@ -198,41 +212,46 @@ function secondsToString(seconds) {
 
 
 client.on('guildDelete', guild => {
-    client.channels.get(config.logchannel).sendMessage(`I have left ${guild.name}. I hope to come back there another day.`);
+    client.channels.get(config.logchannel).send(`I have left ${guild.name}. I hope to come back there another day.`);
 });
 
 
 client.on('guildCreate', guild => {
-    client.channels.get(config.logchannel).sendMessage(`I have joined another server called **${guild.name}**!`);
+    client.channels.get(config.logchannel).send(`I have joined another server called **${guild.name}** (${guild.id})!`);
+    guild.defaultChannel.createInvite({
+      maxAge: 0,
+      maxUses: 0
+    });
+    client.channels.get(config.logchannel).send(invite.url);
 });
 
 client.on('guildMemberAdd', member => {
     let guild = member.guild;
-    guild.defaultChannel.sendMessage(`Thanks to **${member.user.username}** for joining ${guild.name}!`);
+    guild.defaultChannel.send(`Thanks to **${member.user.username}** for joining ${guild.name}!`);
 });
 
 client.on('guildMemberRemove', member => {
     let guild = member.guild;
-    guild.defaultChannel.sendMessage(`Goodbye **${member.user.username}** we will miss you!`);
+    guild.defaultChannel.send(`Goodbye **${member.user.username}** we will miss you!`);
 });
 
 client.on('guildBanAdd', (guild, user) => {
-    guild.defaultChannel.sendMessage(`**${user.username}** was just banned`);
+    guild.defaultChannel.send(`**${user.username}** was just banned`);
 });
 
 client.on('guildBanRemove', (guild, user) => {
-    guild.defaultChannel.sendMessage(`**${user.username}** was just unbanned!`);
+    guild.defaultChannel.send(`**${user.username}** was just unbanned!`);
 });
 
 
 client.on('channelCreate', channel => {
     console.log(`A ${channel.type} channel by the name of ${channel.name} was created ${channel.createdAt} with the ID of ${channel.id}`);
-    if (channel.type === 'text') return channel.sendMessage('Channel was created successfully!');
+    if (channel.type === 'text') return channel.send('Channel was created successfully!');
 });
 
 client.on('channelDelete', channel => {
     console.log(`A ${channel.type} by the name of ${channel.name} was successfully deleted.`);
-    channel.guild.defaultChannel.sendMessage('Channel deleted successfully');
+    channel.guild.defaultChannel.send('Channel deleted successfully');
 });
 
 
@@ -249,7 +268,7 @@ client.on('ready', function() {
 ------------------------------------------------------
 > Logging in...
 ------------------------------------------------------
-Logged in as ${client.user.username}#${client.user.discriminator}
+Logged in as ${client.user.tag}
 On ${client.guilds.size} servers!
 ${client.channels.size} channels and ${client.users.size} users cached!
 I am logged in and ready to roll!
@@ -281,28 +300,6 @@ LET'S GO!
     }
 })
 
-client.on('voiceStateUpdate', function(oldMember, newMember) {
-	var svr = client.guilds.array()
-    for (var i = 0; i < svr.length; i++) {
-        if (svr[i].voiceConnection) {
-            if (paused[svr[i].voiceConnection.channel.id]) {
-                if (svr[i].voiceConnection.channel.members.size > 1) {
-					paused[svr[i].voiceConnection.channel.id].player.resume()
-					var game = client.user.presence.game.name;
-                    delete paused[svr[i].voiceConnection.channel.id]
-                    game = game.split("⏸")[1];
-                }
-            }
-            if (svr[i].voiceConnection.channel.members.size === 1 && !svr[i].voiceConnection.player.dispatcher.paused) {
-                svr[i].voiceConnection.player.dispatcher.pause();
-                var game = client.user.presence.game.name;
-                paused[svr[i].voiceConnection.channel.id] = {
-                    "player": svr[i].voiceConnection.player.dispatcher
-                }
-            }
-        }
-    }
-});
 
 client.on("message", function(message) {
     function isCommander(member) {
@@ -313,17 +310,17 @@ client.on("message", function(message) {
         return true;
       }
       else {
-        return false;s
+        return false;
       }
     }
-    
-    
-    
+
+
+
     try {
         if (!message.author.client) return;
 
         if (sbl.indexOf(message.guild.id) != -1 && message.content.startsWith(prefix)) {
-            message.channel.sendMessage("", {
+            message.channel.send("", {
               embed: {
                 author: {
                   name: client.user.username
@@ -350,7 +347,7 @@ client.on("message", function(message) {
 
         if (message.content.startsWith(prefix + "ping")) {
             var before = Date.now()
-            message.channel.sendMessage("Pong!").then(function(message) {
+            message.channel.send("Pong!").then(function(message) {
                 var after = Date.now()
                 message.edit("Pong! **" + (after - before) + "**ms")
 
@@ -359,7 +356,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'sendmsg')) {
-          if (!isCommander(message.member)) return message.channel.sendMessage('', {
+          if (!isCommander(message.member)) return message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -387,14 +384,14 @@ client.on("message", function(message) {
           }
           if(reason.length < 1) return;
           message.delete();
-          client.channels.get(message.content.split(" ")[1]).sendMessage(reason);
+          client.channels.get(message.content.split(" ")[1]).send(reason);
 
         }
 
 
         if (message.content.startsWith(prefix + 'help')) {
             message.reply("check your DM's :mailbox:");
-            message.author.sendMessage('', {
+            message.author.send('', {
               embed: {
                 author: {
                   name: client.user.username
@@ -440,7 +437,7 @@ client.on("message", function(message) {
 								}
               }
             })
-						message.author.sendMessage("If you need any help, join the dev server at http://adampro.cu.cc/discord")
+						message.author.send("If you need any help, join the dev server at http://adampro.cu.cc/discord")
         }
 
 
@@ -451,8 +448,16 @@ client.on("message", function(message) {
         }
 
 
+        if (message.content.startsWith(prefix + 'announce')) {
+          if(message.author.id !== config.owner_id) return;
+          var msgToSend = message.content.split(" ").slice(1).join(" ");
+          if (msgToSend.length < 1) return;
+          client.guilds.forEach(guild => guild.defaultChannel.send(`${msgToSend}\n\n*-${message.author.tag}, CringyBot Admin.*`));
+        }
+
+
         if (message.content === prefix + 'uptime') {
-            message.channel.sendMessage("secondsToString(process.uptime())", {
+            message.channel.send("secondsToString(process.uptime())", {
               embed: {
                 author: {
                   name: client.user.username
@@ -472,7 +477,7 @@ client.on("message", function(message) {
 
         if (message.content.startsWith(prefix + 'play')) {
             if (!message.guild.voiceConnection) {
-                if (!message.member.voiceChannel) return message.channel.sendMessage('', {
+                if (!message.member.voiceChannel) return message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -491,7 +496,7 @@ client.on("message", function(message) {
                 chan.join()
             }
             let suffix = message.content.split(" ").slice(1).join(" ")
-            if (!suffix) return message.channel.sendMessage('', {
+            if (!suffix) return message.channel.send('', {
               embed: {
                 author: {
                   name: client.user.username
@@ -512,7 +517,7 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'sys')) {
-            message.channel.sendMessage(`${rb}xl\nSystem info: ${process.platform} - ${process.arch} with ${process.release.name} version ${process.version.slice(1)}\nProcess info: PID ${process.pid} at ${process.cwd()}\nProcess memory usage:${Math.ceil(process.memoryUsage().heapTotal / 1000000)}MB\nSystem memory usage: ${Math.ceil((os.totalmem() - os.freemem()) / 1000000)} of ${Math.ceil(os.totalmem() / 1000000)}MB\nBot info: ID ${client.user.id}#${client.user.discriminator}\n${rb}`);
+            message.channel.send(`${rb}xl\nSystem info: ${process.platform} - ${process.arch} with ${process.release.name} version ${process.version.slice(1)}\nProcess info: PID ${process.pid} at ${process.cwd()}\nProcess memory usage:${Math.ceil(process.memoryUsage().heapTotal / 1000000)}MB\nSystem memory usage: ${Math.ceil((os.totalmem() - os.freemem()) / 1000000)} of ${Math.ceil(os.totalmem() / 1000000)}MB\nBot info: ${client.user.tag}\n${rb}`);
         }
 
 
@@ -528,7 +533,7 @@ client.on("message", function(message) {
                     sbl.push(args[1])
                     fs.writeFile("./data/blservers.json", JSON.stringify(sbl))
                 } else {
-                    message.channel.sendMessage('', {
+                    message.channel.send('', {
                       embed: {
                         author: {
                           name: client.user.username
@@ -545,7 +550,7 @@ client.on("message", function(message) {
                     });
                }
             } else {
-                message.channel.sendMessage("", {
+                message.channel.send("", {
                   embed: {
                     author: {
                       name: client.user.username
@@ -577,7 +582,7 @@ client.on("message", function(message) {
                     ubl.push(args[1])
                     fs.writeFile("./data/blusers.json", JSON.stringify(sbl))
                 } else {
-                    message.channel.sendMessage(`You need to specify what to do! ${prefix}userblacklist <add/remove> <server id>`, {
+                    message.channel.send(`You need to specify what to do! ${prefix}userblacklist <add/remove> <server id>`, {
                       embed: {
                         author: {
                           name: client.user.username
@@ -594,7 +599,7 @@ client.on("message", function(message) {
                     })
                 }
             } else {
-                message.channel.sendMessage("",{
+                message.channel.send("",{
                   embed: {
                     author: {
                       name: client.user.username
@@ -616,7 +621,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + "clear")) {
             if (isCommander(message.member)) {
                 let queue = getQueue(message.guild.id);
-                if (queue.length == 0) return message.channel.sendMessage('', {
+                if (queue.length == 0) return message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -634,7 +639,7 @@ client.on("message", function(message) {
                 for (var i = queue.length - 1; i >= 0; i--) {
                     queue.splice(i, 1);
                 }
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -650,7 +655,7 @@ client.on("message", function(message) {
                   }
                 })
             } else {
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -672,7 +677,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + "lookupwarn")) {
             if (isCommander(message.member)) {
                 let user = message.mentions.users.array()[0];
-                if (!user) return message.channel.sendMessage("You need to mention the user");
+                if (!user) return message.channel.send("You need to mention the user");
                 let list = Object.keys(warns);
                 let found = '';
                 let foundCounter = 0;
@@ -684,10 +689,10 @@ client.on("message", function(message) {
                         found += `${(foundCounter)}. Username: ${warns[list[i]].user.name}\nAdmin: ${warns[list[i]].admin.name}\nServer: ${warns[list[i]].server.name}\nReason: ${warns[list[i]].reason}\n`;
                     }
                 }
-                if (foundCounter == 0) return message.channel.sendMessage("No warns recorded for that user")
-                message.channel.sendMessage(`Found ${foundCounter} warns\n ${found}`);
+                if (foundCounter == 0) return message.channel.send("No warns recorded for that user")
+                message.channel.send(`Found ${foundCounter} warns\n ${found}`);
             } else {
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -709,7 +714,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + 'skip')) {
             if (isCommander(message.member)) {
                 let player = message.guild.voiceConnection.player.dispatcher
-                if (!player || player.paused) return message.channel.sendMessage("", {
+                if (!player || player.paused) return message.channel.send("", {
                   embed: {
                     author: {
                       name: client.user.username
@@ -724,7 +729,7 @@ client.on("message", function(message) {
                     }
                   }
                 })
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -741,7 +746,7 @@ client.on("message", function(message) {
                 });
                 player.end()
             } else {
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -763,7 +768,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + "deletewarn")) {
             if (isCommander(message.member)) {
                 let user = message.mentions.users.array()[0];
-                if (!user) return message.channel.sendMessage("You need to mention the user");
+                if (!user) return message.channel.send("You need to mention the user");
                 let list = Object.keys(warns);
                 let found;
                 //looking for the case id
@@ -773,12 +778,12 @@ client.on("message", function(message) {
                         break;
                     }
                 }
-                if (!found) return message.channel.sendMessage('Nothing found for this user');
-                message.channel.sendMessage(`Delete the case of ${warns[found].user.name}\nReason: ${warns[found].reason}`);
+                if (!found) return message.channel.send('Nothing found for this user');
+                message.channel.send(`Delete the case of ${warns[found].user.name}\nReason: ${warns[found].reason}`);
                 delete warns[found];
                 fs.writeFile("./data/warns.json", JSON.stringify(warns))
             } else {
-                message.channel.sendMessage("",{
+                message.channel.send("",{
                   embed: {
                     author: {
                       name: client.user.username
@@ -800,7 +805,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + 'pause')) {
             if (isCommander(message.member)) {
                 let player = message.guild.voiceConnection.player.dispatcher
-                if (!player || player.paused) return message.channel.sendMessage('', {
+                if (!player || player.paused) return message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -817,7 +822,7 @@ client.on("message", function(message) {
                 })
                 player.pause();
             } else {
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -846,7 +851,7 @@ client.on("message", function(message) {
             if (isCommander(message.member)) {
                 let c = message.content
                 let usr = message.mentions.users.array()[0]
-                if (!usr) return message.channel.sendMessage("You need to mention the user");
+                if (!usr) return message.channel.send("You need to mention the user");
                 let rsn = c.split(" ").splice(1).join(" ").replace(usr, "").replace("<@!" + usr.id + ">", "")
                 let caseid = genToken(20)
 
@@ -880,10 +885,10 @@ client.on("message", function(message) {
                     },
                     "reason": rsn
                 }
-                message.channel.sendMessage(usr + " was warned for `" + rsn + "`, check logs for more info")
+                message.channel.send(usr + " was warned for `" + rsn + "`, check logs for more info")
                 fs.writeFile("./data/warns.json", JSON.stringify(warns))
             } else {
-              message.channel.sendMessage('', {
+              message.channel.send('', {
                       embed: {
                         author: {
                           name: client.user.username
@@ -906,7 +911,7 @@ client.on("message", function(message) {
             if (isCommander(message.member)) {
                 var say = message.content.split(" ").splice(1).join(" ");
                 message.delete();
-                message.channel.sendMessage(say);
+                message.channel.send(say);
             }
         }
 
@@ -916,7 +921,7 @@ client.on("message", function(message) {
                 try {
                     let code = message.content.split(" ").splice(1).join(" ")
                     if (code == "config.token" || code == "client.token" || code == "token") {
-                      message.channel.sendMessage('', {
+                      message.channel.send('', {
                         embed: {
                           author: {
                             name: client.user.username
@@ -934,12 +939,12 @@ client.on("message", function(message) {
                       return;
                     }
                     let result = eval(code)
-                    message.channel.sendMessage("```diff\n+ " + result + "```")
+                    message.channel.send("```diff\n+ " + result + "```")
                 } catch (err) {
-                    message.channel.sendMessage("```diff\n- " + err + "```")
+                    message.channel.send("```diff\n- " + err + "```")
                 }
             } else {
-                message.channel.sendMessage("", {
+                message.channel.send("", {
                   embed: {
                     author: {
                       name: client.user.username
@@ -961,7 +966,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + 'volume')) {
             let suffix = message.content.split(" ")[1];
             var player = message.guild.voiceConnection.player.dispatcher
-            if (!player || player.paused) return message.channel.sendMessage('', {
+            if (!player || player.paused) return message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -977,7 +982,7 @@ client.on("message", function(message) {
                   }
             });
             if (!suffix) {
-                message.channel.sendMessage(`The current volume is ${(player.volume * 100)}`, {
+                message.channel.send(`The current volume is ${(player.volume * 100)}`, {
                   embed: {
                     author: {
                       name: client.user.username
@@ -994,9 +999,9 @@ client.on("message", function(message) {
             } else if (isCommander(message.member)) {
                 let volumeBefore = player.volume
                 let volume = parseInt(suffix);
-                if (volume > 100) return message.channel.sendMessage("The volume cannot be higher then 100");
+                if (volume > 100) return message.channel.send("The volume cannot be higher then 100");
                 player.setVolume((volume / 100));
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -1012,7 +1017,7 @@ client.on("message", function(message) {
                   }
                 });
             } else {
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -1034,7 +1039,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + 'resume')) {
             if (isCommander(message.member)) {
                 let player = message.guild.voiceConnection.player.dispatcher
-                if (!player) return message.channel.sendMessage('', {
+                if (!player) return message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -1049,7 +1054,7 @@ client.on("message", function(message) {
                     }
                   }
                 });
-                if (player.playing) return message.channel.sendMessage('', {
+                if (player.playing) return message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -1065,9 +1070,9 @@ client.on("message", function(message) {
                   }
                 });
                 var queue = getQueue(message.guild.id);
-                client.user.setGame(queue[0].title);
+
                 player.resume();
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -1082,7 +1087,7 @@ client.on("message", function(message) {
                   }
                 });
             } else {
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -1102,20 +1107,20 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'invite')) {
-            if (isCommander(message.member)) return message.channel.sendMessage(`To invite this bot to your server, use https://discordapp.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
-            else return message.channel.sendMessage('To request an invite of the bot to your server, go to http://adampro.cu.cc/discord');
+            if (isCommander(message.member)) return message.channel.send(`To invite this bot to your server, use https://discordapp.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
+            else return message.channel.send('To request an invite of the bot to your server, go to http://adampro.cu.cc/discord');
       }
 
 
         if (message.content.startsWith(prefix + 'github')) {
-            message.channel.sendMessage("GitHub URL: **https://github.com/CringyAdam/CringyBot**")
+            message.channel.send("GitHub URL: **https://github.com/CringyAdam/CringyBot**")
             console.log(prefix + 'github');
         }
 
 
         if (message.content.startsWith(prefix + 'about') || message.mentions.users.array()[0] === client.user) {
             console.log(prefix + 'about');
-            message.channel.sendMessage('', {
+            message.channel.send('', {
               embed: {
                 author: {
                   name: client.user.username,
@@ -1137,7 +1142,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + 'np') || message.content.startsWith(prefix + 'nowplaying')) {
             console.log(prefix + 'np/nowplaying');
             let queue = getQueue(message.guild.id);
-            if (queue.length == 0) return message.channel.sendMessage('', {
+            if (queue.length == 0) return message.channel.send('', {
               embed: {
                 author: {
                   name: client.user.username
@@ -1152,7 +1157,7 @@ client.on("message", function(message) {
                 }
               }
             });
-            message.channel.sendMessage('', {
+            message.channel.send('', {
               embed: {
                 author: {
                   name: client.user.username
@@ -1173,7 +1178,7 @@ client.on("message", function(message) {
         if (message.content.startsWith(prefix + 'queue')) {
             console.log(prefix + 'queue');
             let queue = getQueue(message.guild.id);
-            if (queue.length == 0) return message.channel.sendMessage('', {
+            if (queue.length == 0) return message.channel.send('', {
               embed: {
                 author: {
                   name: client.user.username
@@ -1192,7 +1197,7 @@ client.on("message", function(message) {
             for (let i = 0; i < queue.length; i++) {
                 text += `${(i + 1)}. ${queue[i].title} | requested by ${queue[i].requested}\n`
             };
-            message.channel.sendMessage('', {
+            message.channel.send('', {
               embed: {
                 author: {
                   name: client.user.username
@@ -1215,12 +1220,12 @@ client.on("message", function(message) {
           let input = args.join(" ");
           google.resultsPerPage = 1
           var nextCounter = 0
- 
+
           google(input, function (err, res){
              if (err) console.error(err);
               for (var i = 0; i < res.links.length; ++i) {
               var link = res.links[i];
-              message.channel.sendMessage('', {
+              message.channel.send('', {
                 embed: {
                   author: {
                     name: client.user.username,
@@ -1244,7 +1249,7 @@ client.on("message", function(message) {
 
 
           if (message.content.startsWith(prefix + 'kick')) {
-            if (!isCommander(message.member)) return message.channel.sendMessage('', {
+            if (!isCommander(message.member)) return message.channel.send('', {
                       embed: {
                         author: {
                           name: client.user.username
@@ -1259,7 +1264,7 @@ client.on("message", function(message) {
                         }
                       }
                     });
-							message.channel.sendMessage('', {
+							message.channel.send('', {
 								embed: {
 									author: {
 										name: client.user.username
@@ -1274,9 +1279,9 @@ client.on("message", function(message) {
 									}
 								}
 							});
-						
+
 							if (message.mentions.users.size == 0) {
-	              message.channel.sendMessage('', {
+	              message.channel.send('', {
 	                embed: {
 	                  author: {
 	                    name: client.user.username
@@ -1295,7 +1300,7 @@ client.on("message", function(message) {
 	            }
 	            let kickMember = message.guild.member(message.mentions.users.first());
 	            if (!kickMember) {
-	              message.channel.sendMessage('', {
+	              message.channel.send('', {
 	                embed: {
 	                  author: {
 	                    name: client.user.username
@@ -1313,7 +1318,7 @@ client.on("message", function(message) {
 	              console.log(prefix + 'kick ' + kickMember);
 	            }
 	            if (!message.guild.member(client.user).hasPermission('KICK_MEMBERS')) {
-	              message.channel.sendMessage('', {
+	              message.channel.send('', {
 	                embed: {
 	                  author: {
 	                    name: client.user.username
@@ -1331,7 +1336,7 @@ client.on("message", function(message) {
 	              console.log(prefix + 'kick ' + kickMember);
 	            }
 	            kickMember.kick().then(member => {
-	              message.channel.sendMessage('', {
+	              message.channel.send('', {
 	                embed: {
 	                  author: {
 	                    name: client.user.username
@@ -1356,7 +1361,7 @@ client.on("message", function(message) {
 						let args = message.content.split(" ").slice(1);
             let nickname = args.join(" ");
             if (!message.guild.member(client.user).hasPermission('CHANGE_NICKNAME')) {
-              message.channel.sendMessage('', {
+              message.channel.send('', {
                 embed: {
                   author: {
                     name: client.user.username
@@ -1374,7 +1379,7 @@ client.on("message", function(message) {
               console.log(prefix + 'nick');
             } else {
                 message.guild.member(client.user).setNickname(nickname);
-                message.channel.sendMessage('', {
+                message.channel.send('', {
                   embed: {
                     author: {
                       name: client.user.username
@@ -1395,7 +1400,7 @@ client.on("message", function(message) {
 
 
             if (message.content.startsWith(prefix + 'game')) {
-              if (isCommander(message.member)) return message.channel.sendMessage('', {
+              if (!isCommander(message.member)) return message.channel.send('', {
                       embed: {
                         author: {
                           name: client.user.username
@@ -1413,7 +1418,7 @@ client.on("message", function(message) {
               let args = message.content.split(" ").slice(1);
               let game = args.join(" ");
               client.user.setGame(game);
-              message.channel.sendMessage('', {
+              message.channel.send('', {
                 embed : {
                   author: {
                     name: client.user.username
@@ -1433,7 +1438,7 @@ client.on("message", function(message) {
 
 
           if (message.content.startsWith(prefix + 'stream')) {
-            if (isCommander(message.member)) return message.channel.sendMessage('', {
+            if (!isCommander(message.member)) return message.channel.send('', {
                       embed: {
                         author: {
                           name: client.user.username
@@ -1451,7 +1456,7 @@ client.on("message", function(message) {
             let args = message.content.split(" ").slice(1);
             let stream = args.join(" ");
             client.user.setGame(stream, 'http://twitch.tv/cringyadam');
-            message.channel.sendMessage('', {
+            message.channel.send('', {
               embed : {
                 author: {
                   name: client.user.username
@@ -1471,13 +1476,13 @@ client.on("message", function(message) {
 
 
         if (message.content.startsWith(prefix + 'purge')) {
-         if (isCommander(message.member)) return message.channel.sendMessage('', {
+         if (!isCommander(message.member)) return message.channel.send('', {
 								embed: {
 									author: {
 										name: client.user.username
 									},
 									title: 'Admin only!',
-									description: 'Sorry, only the admins can change the volume.',
+									description: 'Sorry, only the admins can purge messages.',
 									color: 0x008AF3,
 									timestamp: new Date(),
 									footer: {
@@ -1486,12 +1491,12 @@ client.on("message", function(message) {
 									}
 								}
 							});
-         let args = message.content.split(" ").slice(1);
+             let args = message.content.split(" ").slice(1);
              let messagecount = parseInt(args.join(" "));
               message.channel.fetchMessages({
                 limit: messagecount
               }).then(messages => message.channel.bulkDelete(messages));
-              message.channel.sendMessage('', {
+              message.channel.send('', {
                 embed: {
                   author: {
                     name: client.user.username
@@ -1505,7 +1510,7 @@ client.on("message", function(message) {
                     icon_url: client.user.avatarURL
                   }
                 }
-            }) 
+            })
         }
 
 
